@@ -1,6 +1,18 @@
 <?php
 
-$data = json_decode(file_get_contents(__DIR__ . '/data/vanguard.json'));
+#CONFIG: set manually
+$sourceFile = __DIR__ . '/data/vanguard.json';
+
+
+$pathinfo = pathinfo($sourceFile);
+$sourceDir = $pathinfo['dirname'];
+$fileStem = $pathinfo['filename'];
+
+$outFile = __DIR__ . '/data/vanguard-waypoints.gpx';
+
+$outFile = "$sourceDir/$fileStem-waypoints.gpx";
+
+$data = json_decode(file_get_contents($sourceFile));
 
 $items = $data->response->list->listItems->items;
 $title = $data->response->list->name;
@@ -12,12 +24,12 @@ $meta = "<metadata><name>$title</name><time>$time</time></metadata>";
 
 $typeMap =
     [
-        'Train Station' => ['Trackback','ff0000'],
-        'Pub' => ['House','00ffff'],
-        'Gastropub' => ['House','00ffff'],
-        'Bar' => ['House','00ffff'],
-        'Restaurant' => ['House','00ffff'],
-        'Hotel' => ['House','00ffff'],
+        'Train Station' => ['Trackback', 'ff0000'],
+        'Pub' => ['House', '00ffff'],
+        'Gastropub' => ['House', '00ffff'],
+        'Bar' => ['House', '00ffff'],
+        'Restaurant' => ['House', '00ffff'],
+        'Hotel' => ['House', '00ffff'],
     ];
 
 $waypoints = [];
@@ -32,7 +44,7 @@ foreach ($items as $item) {
 
     $sym = 'Pin';
     $color = '00ff00';
-    if(array_key_exists($type,$typeMap)) {
+    if (array_key_exists($type, $typeMap)) {
         $sym = $typeMap[$type][0];
         $color = $typeMap[$type][1];
     }
@@ -44,4 +56,6 @@ $closeTag = "</gpx>";
 
 $contents = "$startTag\n$meta\n" . implode("\n", $waypoints) . $closeTag;
 
-file_put_contents(__DIR__ . '/data/vanguard-waypoints.gpx', $contents);
+file_put_contents($outFile, $contents);
+
+fputs(STDERR, "\nOutput to $outFile\n\n");
